@@ -25,6 +25,7 @@ function SoccerGoalsPredictorContent() {
     error: predictionsError,
     fetchPredictions,
     recordResult,
+    loadPredictions, // Added for initial load
   } = usePredictions(user?.id);
 
   const { stats } = useModelStats(user?.id);
@@ -33,9 +34,10 @@ function SoccerGoalsPredictorContent() {
 
   useEffect(() => {
     if (user?.id) {
-      // Load data on mount
+      loadPredictions(); // Load existing predictions
+      handleFetchPredictions(); // Fetch new predictions
     }
-  }, [user?.id]);
+  }, [user?.id, loadPredictions]);
 
   if (authLoading) {
     return (

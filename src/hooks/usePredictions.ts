@@ -12,7 +12,7 @@ export function usePredictions(userId: string | undefined) {
 
     try {
       setLoading(true);
-      setError('');
+      setError(''); // Clear previous errors
       const data = await db.getPredictions(userId);
       setPredictions(data || []);
     } catch (err) {
@@ -32,8 +32,7 @@ export function usePredictions(userId: string | undefined) {
 
       try {
         setLoading(true);
-        setError('');
-
+        setError(''); // Clear previous errors
         const token = (await supabase.auth.getSession()).data.session?.access_token;
         if (!token) throw new Error('No access token');
 

@@ -1,15 +1,14 @@
 # Soccer Goals Predictor
+
 A React + Supabase app that predicts total goals in major soccer leagues using the Football API.
 
 ## Features
-- User auth and personalized predictions
-- Edge functions for data fetching
-- Accuracy tracking
+- User authentication and personalized predictions
+- Edge functions for fetching and computing match predictions
+- Accuracy tracking with historical results
+- Responsive UI with Tailwind CSS and Lucide icons
 
 ## Setup
-1. `npm install`
-2. Set Supabase env vars
-3. `npm run dev`
-
-## API
-Uses v3.football.api-sports.io (add your key in Settings).
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Brikipp/Soccer-Goals-Predictor.git
