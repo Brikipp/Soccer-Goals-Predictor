@@ -1,21 +1,21 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
 
-// Define CORS headers to allow localhost
-const customCorsHeaders = {
-  'Access-Control-Allow-Origin': 'http://localhost:5173', // Explicitly allow your frontend
+// Define CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'http://localhost:5173',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
   'Access-Control-Max-Age': '86400',
 };
 
 serve(async (req: Request) => {
-  // Handle CORS preflight (OPTIONS) request
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return new Response(null, {
       status: 204,
-      headers: customCorsHeaders,
+      headers: corsHeaders,
     });
   }
 
@@ -44,6 +44,10 @@ serve(async (req: Request) => {
       throw new Error('Invalid or missing dates');
     }
 
+    // Log API key presence
+    const apiKey = Deno.env.get('FOOTBALL_API_KEY') ?? '';
+    console.log('Football API Key:', apiKey ? 'Present' : 'Missing');
+
     // Fetch fixtures from Football API
     const allFixtures: any[] = [];
     for (const date of dates) {
@@ -51,10 +55,15 @@ serve(async (req: Request) => {
         `https://v3.football.api-sports.io/fixtures?date=${date}`,
         {
           headers: {
-            'x-apisports-key': Deno.env.get('FOOTBALL_API_KEY') ?? '',
+            'x-apisports-key': apiKey,
           },
         }
       );
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Football API error: Status ${response.status}, Body: ${errorText}`);
+        throw new Error(`Football API failed: Status ${response.status}, ${errorText}`);
+      }
       const data = await response.json();
       allFixtures.push(...(data.response || []));
     }
@@ -95,16 +104,16 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify(detailedPredictions.filter((p) => p)),
       {
-        headers: { ...customCorsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in fetch-predictions:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
-        headers: { ...customCorsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       }
     );
