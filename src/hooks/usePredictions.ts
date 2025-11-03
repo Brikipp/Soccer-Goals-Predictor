@@ -12,12 +12,14 @@ export function usePredictions(userId: string | undefined) {
 
     try {
       setLoading(true);
-      setError(''); // Clear previous errors
+      setError('');
       const data = await db.getPredictions(userId);
       setPredictions(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load predictions');
+      const message = err instanceof Error ? `Load predictions failed: ${err.message}` : 'Failed to load predictions';
+      setError(message);
       console.error('Error loading predictions:', err);
+      console.error('Full error details:', JSON.stringify(err, null, 2));
     } finally {
       setLoading(false);
     }
@@ -32,9 +34,11 @@ export function usePredictions(userId: string | undefined) {
 
       try {
         setLoading(true);
-        setError(''); // Clear previous errors
+        setError('');
         const token = (await supabase.auth.getSession()).data.session?.access_token;
         if (!token) throw new Error('No access token');
+
+        console.log('Fetching predictions from:', `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-predictions`);
 
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-predictions`,
@@ -50,10 +54,11 @@ export function usePredictions(userId: string | undefined) {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch predictions');
+          throw new Error(errorData.error || `Fetch failed with status ${response.status}: CORS or server issue`);
         }
 
         const newPredictions = await response.json();
+        console.log('Received predictions:', newPredictions);
 
         for (const pred of newPredictions) {
           await db.savePrediction(userId, pred);
@@ -65,10 +70,10 @@ export function usePredictions(userId: string | undefined) {
           return [...newPredictions, ...filtered];
         });
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Failed to fetch predictions';
+        const message = err instanceof Error ? `Fetch predictions failed: ${err.message}` : 'Failed to fetch predictions';
         setError(message);
         console.error('Error fetching predictions:', err);
+        console.error('Full error details:', JSON.stringify(err, null, 2));
       } finally {
         setLoading(false);
       }
