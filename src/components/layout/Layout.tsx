@@ -1,14 +1,17 @@
-import Header from "./Header";
-import Sidebar from "./Sidebar";
+import { Header } from "./Header";
+import { AppSidebar } from "./AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="p-6">{children}</main>
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar />
+        <div className="flex flex-1 flex-col">
+          <Header />
+          <main className="flex-1 p-6 animate-fade-in">{children}</main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

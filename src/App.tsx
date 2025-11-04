@@ -1,53 +1,39 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/layout/Layout";
-import PredictionsTab from "./components/PredictionsTab";
-import HistoryTab from "./components/HistoryTab";
-import { SettingsPanel } from "./components/SettingsPanel";
-import { AuthForm } from "./components/AuthForm";
-import { ThemeProvider } from "./ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Layout } from "@/components/layout/Layout";
+import Predictions from "./pages/Predictions";
+import History from "./pages/History";
+import Settings from "./pages/Settings";
+import Auth from "./pages/Auth";
+import NotFound from "./pages/NotFound";
 
-function App() {
-  return (
-    <ThemeProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <PredictionsTab
-                  predictions={[]}
-                  loading={false}
-                  onFetchPredictions={() => {}}
-                  onRecordResult={() => {}}
-                />
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                <HistoryTab
-                  historicalData={[]}
-                  onClearHistory={() => {}}
-                />
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <SettingsPanel
-                  userId={""}
-                  onClose={() => {}}
-                />
-              }
-            />
-            <Route path="/auth" element={<AuthForm loading={false} error="" />} />
-          </Routes>
-        </Layout>
-      </Router>
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Predictions />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/auth" element={<Auth />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </TooltipProvider>
     </ThemeProvider>
-  );
-}
+  </QueryClientProvider>
+);
 
 export default App;
