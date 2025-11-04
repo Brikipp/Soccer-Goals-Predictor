@@ -1,14 +1,17 @@
 // src/services/supabaseClient.ts
 import { createClient } from '@supabase/supabase-js';
 
-// Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Get environment variables with fallback for development
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Validate that environment variables are set
 if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables');
+  console.error('VITE_SUPABASE_URL:', supabaseUrl ? 'set' : 'missing');
+  console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'set' : 'missing');
   throw new Error(
-    'Missing Supabase environment variables. Please check your .env file.'
+    'Missing Supabase environment variables. Please check your .env file and restart the dev server.'
   );
 }
 
