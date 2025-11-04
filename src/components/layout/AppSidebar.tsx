@@ -1,5 +1,5 @@
-import { TrendingUp, History, Settings, LogIn } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { TrendingUp, History, User, LogIn, LogOut } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -11,16 +11,33 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar.tsx";
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
-const navItems = [
+const publicNavItems = [
   { title: "Predictions", route: "/", icon: TrendingUp },
   { title: "History", route: "/history", icon: History },
-  { title: "Settings", route: "/settings", icon: Settings },
+  { title: "Profile", route: "/settings", icon: User },
   { title: "Login", route: "/auth", icon: LogIn },
+];
+
+const authenticatedNavItems = [
+  { title: "Predictions", route: "/", icon: TrendingUp },
+  { title: "History", route: "/history", icon: History },
+  { title: "Profile", route: "/settings", icon: User },
 ];
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+  
+  const navItems = user ? authenticatedNavItems : publicNavItems;
 
   return (
     <Sidebar 
@@ -53,6 +70,22 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Logout button for authenticated users */}
+              {user && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Logout">
+                    <Button
+                      onClick={handleLogout}
+                      variant="ghost"
+                      className="w-full justify-start text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all"
+                    >
+                      <LogOut className="h-5 w-5 shrink-0" />
+                      <span className="font-medium">Logout</span>
+                    </Button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

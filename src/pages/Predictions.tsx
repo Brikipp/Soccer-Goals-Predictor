@@ -65,9 +65,8 @@ export default function Predictions() {
     
     try {
       // Fetch fixtures from the selected league
-      const fixtures = await fetchUpcomingFixturesByLeague(parseInt(selectedLeague), 2024, {
-        status: 'NS', // Not Started
-        limit: 30
+      const fixtures = await fetchUpcomingFixturesByLeague(parseInt(selectedLeague), new Date().getFullYear(), {
+        limit: 50
       }).catch(err => {
         console.error('Failed to fetch fixtures:', err);
         throw err;
