@@ -1,5 +1,5 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 // Define CORS headers
 const corsHeaders = {
@@ -22,8 +22,8 @@ serve(async (req: Request) => {
   try {
     // Initialize Supabase client
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      (globalThis as any).Deno?.env?.get('SUPABASE_URL') ?? '',
+      (globalThis as any).Deno?.env?.get('SUPABASE_ANON_KEY') ?? ''
     );
 
     // Get user from Authorization header

@@ -54,7 +54,7 @@ export function PredictionsTab({
             key={pred.id}
             prediction={pred}
             onRecordResult={(goals) =>
-              onRecordResult(pred.id as string, goals)
+              onRecordResult(String(pred.id), goals)
             }
           />
         ))
