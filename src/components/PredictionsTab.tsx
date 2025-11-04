@@ -8,7 +8,7 @@ import StatsCard from "./StatsCard";
 </div>
 
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../services/supabaseClient";
 import { savePrediction } from "../lib/predictionService";
 import PredictionCard from "./PredictionCard";
 

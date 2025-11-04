@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../services/supabaseClient";
 
 export default function HistoryTab() {
   const [predictions, setPredictions] = useState<any[]>([]);

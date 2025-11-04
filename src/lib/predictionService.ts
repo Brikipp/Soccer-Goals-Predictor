@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { supabase } from "../services/supabaseClient";
 
 export async function savePrediction(payload: {
   user_id: string | null;
