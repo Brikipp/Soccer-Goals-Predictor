@@ -10,6 +10,9 @@ async function call(path: string, params?: Record<string,string|number>) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
   }
 
+  console.log('🔍 API Request:', url.toString());
+  console.log('🔑 API Key exists:', !!API_KEY);
+
   const res = await fetch(url.toString(), {
     method: "GET",
     headers: {
@@ -18,13 +21,17 @@ async function call(path: string, params?: Record<string,string|number>) {
     },
   });
 
+  console.log('📊 API Response Status:', res.status);
+
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Football API error ${res.status}: ${body}`);
   }
   const json = await res.json();
-  // Many API-Football responses put data in json.response
-  return json.response ?? json;
+  const data = json.response ?? json;
+  console.log('📋 API Response Data:', data);
+  console.log('📊 Number of fixtures:', Array.isArray(data) ? data.length : 'Not an array');
+  return data;
 }
 
 export async function fetchUpcomingFixturesByLeague(leagueId:number, season:number, params?: Record<string,string|number>) {
@@ -35,4 +42,18 @@ export async function fetchFixtureById(fixtureId:number) {
   return call("/fixtures", { id: fixtureId });
 }
 
-export default { fetchUpcomingFixturesByLeague, fetchFixtureById };
+export async function fetchAllFixtures(season:number, params?: Record<string,string|number>) {
+  return call("/fixtures", { season, ...params });
+}
+
+export { call };
+
+// Alternative API - TheSportsDB (completely free)
+export async function testAlternativeAPI() {
+  const response = await fetch('https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4328&s=2024');
+  const data = await response.json();
+  console.log('Alternative API response:', data);
+  return data;
+}
+
+export default { fetchUpcomingFixturesByLeague, fetchFixtureById, fetchAllFixtures, testAlternativeAPI };
