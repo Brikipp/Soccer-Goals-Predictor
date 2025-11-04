@@ -1,6 +1,6 @@
 import { Header } from "./Header";
-import { AppSidebar } from "./AppSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "./AppSidebar.tsx";
+import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (

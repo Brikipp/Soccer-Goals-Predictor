@@ -1,7 +1,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button.tsx";
+import { SidebarTrigger } from "@/components/ui/sidebar.tsx";
 
 export function Header() {
   const { theme, setTheme } = useTheme();
