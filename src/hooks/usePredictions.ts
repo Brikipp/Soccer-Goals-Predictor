@@ -1,129 +1,151 @@
-import { useState, useCallback } from 'react';
-import { supabase, Prediction } from '../lib/supabase';
-import * as db from '../lib/database';
+// src/hooks/usePredictions.ts
+import { useState, useEffect } from 'react';
+import { supabase } from '../services/supabaseClient';
 
-export function usePredictions(userId: string | undefined) {
+interface Prediction {
+  id: string;
+  user_id: string;
+  match_id: string;
+  predicted_total_goals: number;
+  predicted_home_goals: number | null;
+  predicted_away_goals: number | null;
+  confidence: number | null;
+  prediction_range_min: number | null;
+  prediction_range_max: number | null;
+  actual_total_goals: number | null;
+  accuracy_percentage: number | null;
+  created_at: string;
+  matches?: {
+    home_team: string;
+    away_team: string;
+    league: string;
+    match_date: string;
+    status: string;
+    home_score: number | null;
+    away_score: number | null;
+  };
+}
+
+interface UsePredictionsResult {
+  predictions: Prediction[];
+  loading: boolean;
+  error: string | null;
+  savePrediction: (data: SavePredictionData) => Promise<{ success: boolean; error?: string }>;
+  refetch: () => Promise<void>;
+}
+
+interface SavePredictionData {
+  match_id: string;
+  predicted_total_goals: number;
+  predicted_home_goals: number;
+  predicted_away_goals: number;
+  confidence: number;
+  prediction_range_min: number;
+  prediction_range_max: number;
+}
+
+/**
+ * Custom hook to manage user predictions
+ */
+export function usePredictions(userId: string | undefined): UsePredictionsResult {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadPredictions = useCallback(async () => {
-    if (!userId) return;
+  const fetchPredictions = async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
-      setError('');
-      const data = await db.getPredictions(userId);
+      setError(null);
+
+      const { data, error: fetchError } = await supabase
+        .from('predictions')
+        .select(`
+          *,
+          matches (
+            home_team,
+            away_team,
+            league,
+            match_date,
+            status,
+            home_score,
+            away_score
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
       setPredictions(data || []);
     } catch (err) {
-      const message = err instanceof Error ? `Load predictions failed: ${err.message}` : 'Failed to load predictions';
-      setError(message);
-      console.error('Error loading predictions:', err);
-      console.error('Full error details:', JSON.stringify(err, null, 2));
+      console.error('Error fetching predictions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch predictions');
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  };
 
-  const fetchPredictions = useCallback(
-    async (dates: string[]) => {
-      if (!userId) {
-        setError('User not authenticated');
-        return;
-      }
+  const savePrediction = async (data: SavePredictionData) => {
+    if (!userId) {
+      return { success: false, error: 'User not authenticated' };
+    }
 
-      try {
-        setLoading(true);
-        setError('');
-        const token = (await supabase.auth.getSession()).data.session?.access_token;
-        if (!token) throw new Error('No access token');
-
-        console.log('Fetching predictions from:', `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-predictions`);
-
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-predictions`,
+    try {
+      const { data: newPrediction, error: saveError } = await supabase
+        .from('predictions')
+        .insert([
           {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ dates }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `Fetch failed with status ${response.status}: CORS or server issue`);
-        }
-
-        const newPredictions = await response.json();
-        console.log('Received predictions:', newPredictions);
-
-        for (const pred of newPredictions) {
-          await db.savePrediction(userId, pred);
-        }
-
-        setPredictions((prev) => {
-          const existingIds = new Set(prev.map((p) => p.id));
-          const filtered = prev.filter((p) => !existingIds.has(p.id));
-          return [...newPredictions, ...filtered];
-        });
-      } catch (err) {
-        const message = err instanceof Error ? `Fetch predictions failed: ${err.message}` : 'Failed to fetch predictions';
-        setError(message);
-        console.error('Error fetching predictions:', err);
-        console.error('Full error details:', JSON.stringify(err, null, 2));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [userId]
-  );
-
-  const recordResult = useCallback(
-    async (predictionId: string, actualGoals: number) => {
-      if (!userId) return;
-
-      try {
-        const prediction = predictions.find((p) => p.id === predictionId);
-        if (!prediction) return;
-
-        const predictedMin = parseInt(prediction.prediction);
-        const result = actualGoals >= predictedMin ? 'correct' : 'incorrect';
-
-        await db.updatePredictionResult(
-          predictionId,
-          actualGoals,
-          result as 'correct' | 'incorrect'
-        );
-
-        setPredictions((prev) =>
-          prev.map((p) =>
-            p.id === predictionId
-              ? { ...p, actual_goals: actualGoals, result }
-              : p
+            user_id: userId,
+            ...data,
+          },
+        ])
+        .select(`
+          *,
+          matches (
+            home_team,
+            away_team,
+            league,
+            match_date,
+            status,
+            home_score,
+            away_score
           )
-        );
+        `)
+        .single();
 
-        const completed = predictions.filter((p) => p.result !== null);
-        const correct = predictions.filter((p) => p.result === 'correct').length;
-        await db.updateModelStats(userId, completed.length, correct);
-      } catch (err) {
-        console.error('Error recording result:', err);
+      if (saveError) {
+        throw saveError;
       }
-    },
-    [predictions, userId]
-  );
+
+      // Add to local state
+      setPredictions([newPrediction, ...predictions]);
+
+      return { success: true };
+    } catch (err) {
+      console.error('Error saving prediction:', err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to save prediction',
+      };
+    }
+  };
+
+  useEffect(() => {
+    fetchPredictions();
+  }, [userId]);
 
   return {
     predictions,
     loading,
     error,
-    loadPredictions,
-    fetchPredictions,
-    recordResult,
-    setPredictions,
-    setError,
+    savePrediction,
+    refetch: fetchPredictions,
   };
 }

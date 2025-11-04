@@ -40,54 +40,46 @@ serve(async (req: Request) => {
 
     // Parse request body
     const { dates } = await req.json();
-    if (!dates || !Array.isArray(dates)) {
-      throw new Error('Invalid or missing dates');
-    }
+    console.log('Request dates:', dates);
 
-    // Log API key presence
-    const apiKey = Deno.env.get('FOOTBALL_API_KEY') ?? '';
-    console.log('Football API Key:', apiKey ? 'Present' : 'Missing');
-
-    // Fetch fixtures from Football API
-    const allFixtures: any[] = [];
+    // Fetch data from TheSportsDB (use search for events)
+    const allEvents: any[] = [];
     for (const date of dates) {
       const response = await fetch(
-        `https://v3.football.api-sports.io/fixtures?date=${date}`,
-        {
-          headers: {
-            'x-apisports-key': apiKey,
-          },
-        }
+        `https://www.thesportsdb.com/api/v1/json/123/searchevent.php?e=${date}`
       );
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Football API error: Status ${response.status}, Body: ${errorText}`);
-        throw new Error(`Football API failed: Status ${response.status}, ${errorText}`);
+        console.error(`TheSportsDB error for date ${date}: Status ${response.status}`);
+        continue;
       }
       const data = await response.json();
-      allFixtures.push(...(data.response || []));
+      console.log(`TheSportsDB response for date ${date}: ${data.event ? 1 : 0} results`);
+      allEvents.push(...(data.event || []));
     }
 
-    // Process fixtures
-    const detailedPredictions = allFixtures.map((fixture) => {
-      if (!fixture?.fixture?.id) return null;
+    // Filter and limit to 10 events
+    const selectedEvents = allEvents.slice(0, 10);
+    console.log(`Selected events: ${selectedEvents.length}`);
+
+    // Enrich with predictions
+    const detailedPredictions = selectedEvents.map((event) => {
       const match = {
-        id: fixture.fixture.id,
-        date: fixture.fixture.date.split('T')[0],
-        time: fixture.fixture.date.split('T')[1].slice(0, 5),
-        homeTeam: fixture.teams.home.name,
-        awayTeam: fixture.teams.away.name,
-        league: fixture.league.name,
-        isDerby: fixture.league.name.includes('Derby') || false,
+        id: event.idEvent || 'unknown',
+        date: event.dateEvent.split('T')[0],
+        time: event.dateEvent.split('T')[1]?.slice(0, 5) || 'TBD',
+        homeTeam: event.strHomeTeam || 'Home Team',
+        awayTeam: event.strAwayTeam || 'Away Team',
+        league: event.strLeague || 'Unknown League',
+        isDerby: event.strEvent.includes('Derby') || false,
         isRivalry: false,
         homeStats: {
-          goalsScored: fixture.teams.home.goals || 0,
-          homePerf: Math.random(),
+          goalsScored: 1.5,
+          homePerf: 1.5,
           form: ['W', 'L', 'D'],
         },
         awayStats: {
-          goalsScored: fixture.teams.away.goals || 0,
-          awayPerf: Math.random(),
+          goalsScored: 1.5,
+          awayPerf: 1.5,
           form: ['L', 'W', 'D'],
         },
         h2h: { avg: 2.5, last5: [2, 3, 1, 4, 0] },
@@ -95,14 +87,12 @@ serve(async (req: Request) => {
         injuries: [],
         confidence: 75,
       };
-      return {
-        ...match,
-        ...calculateGoalsPrediction(match),
-      };
+      const prediction = calculateGoalsPrediction(match);
+      return { ...match, ...prediction };
     });
 
     return new Response(
-      JSON.stringify(detailedPredictions.filter((p) => p)),
+      JSON.stringify(detailedPredictions),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
