@@ -1,37 +1,53 @@
 import React from "react";
-import { Header } from "./components/Header";
-import { AuthForm } from "./components/AuthForm";
-import { PredictionsTab } from "./components/PredictionsTab";
-import { HistoryTab } from "./components/HistoryTab";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/layout/Layout";
+import PredictionsTab from "./components/PredictionsTab";
+import HistoryTab from "./components/HistoryTab";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { AuthForm } from "./components/AuthForm";
+import { ThemeProvider } from "./ThemeProvider";
 
-export default function App() {
+function App() {
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <Header
-        onSettingsClick={() => {
-          // handle settings click
-        }}
-        onSignOut={() => {
-          // handle sign out
-        }}
-      />
-      
-      <h2>✅ App Running</h2>
-      <p>We are loading existing components one by one to verify they work.</p>
-
-      {/* Enable components gradually */}
-      <div style={{ marginTop: "20px" }}>
-        <AuthForm loading={false} error="" />
-        <PredictionsTab
-          predictions={[]}
-          loading={false}
-          onFetchPredictions={() => {}}
-          onRecordResult={() => {}}
-        />
-        {/* <HistoryTab /> */}
-        <SettingsPanel userId="demoUser" onClose={() => {}} />
-      </div>
-    </div>
+    <ThemeProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <PredictionsTab
+                  predictions={[]}
+                  loading={false}
+                  onFetchPredictions={() => {}}
+                  onRecordResult={() => {}}
+                />
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <HistoryTab
+                  historicalData={[]}
+                  onClearHistory={() => {}}
+                />
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <SettingsPanel
+                  userId={""}
+                  onClose={() => {}}
+                />
+              }
+            />
+            <Route path="/auth" element={<AuthForm loading={false} error="" />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </ThemeProvider>
   );
 }
+
+export default App;

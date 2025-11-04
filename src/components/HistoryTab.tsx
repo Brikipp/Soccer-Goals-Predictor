@@ -1,48 +1,61 @@
-import React from 'react';
-import { History } from 'lucide-react';
-import { HistoryEntry } from './HistoryEntry';
-import type { Prediction } from '../lib/supabase';
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
-interface HistoryTabProps {
-  historicalData: Prediction[];
-  onClearHistory: () => void;
-}
+export default function HistoryTab() {
+  const [predictions, setPredictions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export function HistoryTab({ historicalData, onClearHistory }: HistoryTabProps) {
+  useEffect(() => {
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData?.user?.id ?? null;
+      if (!userId) {
+        setPredictions([]);
+        setLoading(false);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("predictions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("match_date", { ascending: false });
+
+      if (error) {
+        console.error("History load failed:", error);
+        setPredictions([]);
+      } else {
+        setPredictions(data || []);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return <div>Loading history...</div>;
+
+  if (predictions.length === 0) return <div>No history found.</div>;
+
   return (
-    <div className="space-y-4">
-      <div className="bg-white rounded-lg shadow-lg p-6 flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">
-            Historical Data
-          </h3>
-          <p className="text-sm text-gray-600">
-            Model learns from these results to improve accuracy
-          </p>
-        </div>
-        {historicalData.length > 0 && (
-          <button
-            onClick={onClearHistory}
-            className="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-red-200 transition"
-          >
-            Clear History
-          </button>
-        )}
+    <div>
+      <h2 className="text-xl mb-4">Prediction History</h2>
+      <div className="space-y-3">
+        {predictions.map(p => (
+          <div key={p.id} className="p-3 border rounded bg-white dark:bg-gray-900">
+            <div className="flex justify-between">
+              <div>
+                <div className="font-medium">{p.home_team} vs {p.away_team}</div>
+                <div className="text-sm text-gray-500">Predicted: {p.predicted_home_goals} - {p.predicted_away_goals}</div>
+                <div className="text-sm text-gray-500">Match date: {new Date(p.match_date).toLocaleString()}</div>
+              </div>
+              <div className="text-right">
+                <div className={`px-2 py-1 rounded ${p.result === 'win' ? 'bg-green-100 text-green-700' : p.result === 'lose' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                  {p.result ?? 'pending'}
+                </div>
+                <div className="text-xs text-gray-400 mt-1">Saved: {new Date(p.created_at).toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-
-      {historicalData.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-          <History size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            No Historical Data
-          </h3>
-          <p className="text-gray-600">Add actual results to build learning data</p>
-        </div>
-      ) : (
-        historicalData.map((entry) => (
-          <HistoryEntry key={entry.id} entry={entry} />
-        ))
-      )}
     </div>
   );
 }

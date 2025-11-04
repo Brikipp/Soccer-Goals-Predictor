@@ -1,22 +1,18 @@
-import React from 'react';
 
 interface StatsCardProps {
   title: string;
   value: string | number;
-  color: 'blue' | 'green' | 'orange';
+  subtitle?: string;
 }
 
-export function StatsCard({ title, value, color }: StatsCardProps) {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    orange: 'bg-orange-50 text-orange-600',
-  };
-
+export default function StatsCard({ title, value, subtitle }: StatsCardProps) {
   return (
-    <div className={`${colorClasses[color]} p-4 rounded-lg`}>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-sm text-gray-600">{title}</div>
+    <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 hover:shadow-md transition">
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</h3>
+      <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+      {subtitle && (
+        <span className="text-xs text-gray-400 dark:text-gray-500">{subtitle}</span>
+      )}
     </div>
   );
 }

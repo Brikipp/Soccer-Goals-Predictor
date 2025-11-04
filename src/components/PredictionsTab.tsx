@@ -1,64 +1,74 @@
-import React from 'react';
-import { Calendar, Plus, RefreshCw } from 'lucide-react';
-import { PredictionCard } from './PredictionCard';
-import type { Prediction } from '../lib/supabase';
+import StatsCard from "./StatsCard";
 
-interface PredictionsTabProps {
-  predictions: Prediction[];
-  loading: boolean;
-  onFetchPredictions: () => void;
-  onRecordResult: (predictionId: string, actualGoals: number) => void;
-}
+<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <StatsCard title="Accuracy" value="72%" subtitle="Last 100 games" />
+  <StatsCard title="Total Predictions" value="154" />
+  <StatsCard title="Win Rate" value="68%" />
+  <StatsCard title="ROI" value="+12.3%" />
+</div>
 
-export function PredictionsTab({
-  predictions,
-  loading,
-  onFetchPredictions,
-  onRecordResult,
-}: PredictionsTabProps) {
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { savePrediction } from "../lib/predictionService";
+import PredictionCard from "./PredictionCard";
+
+export default function PredictionsTab() {
+  const [predictions, setPredictions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [home, setHome] = useState("");
+  const [away, setAway] = useState("");
+  const [phg, setPhg] = useState<number>(1.5);
+  const [pag, setPag] = useState<number>(1.0);
+
+  useEffect(() => {
+    async function load() {
+      const { data, error } = await supabase.from("predictions").select("*").order("match_date", {ascending:false});
+      setPredictions(data || []);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  async function handleSave() {
+    // try to get user
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id ?? null;
+    const matchDate = new Date().toISOString();
+
+    const { data, error } = await savePrediction({
+      user_id: userId,
+      home_team: home,
+      away_team: away,
+      predicted_home_goals: phg,
+      predicted_away_goals: pag,
+      match_date: matchDate,
+    });
+
+    if (error) {
+      alert("Save failed: " + error.message);
+      return;
+    }
+
+    setPredictions(prev => [data, ...prev]);
+    setHome(""); setAway(""); setPhg(1.5); setPag(1.0);
+  }
+
+  if (loading) return <div>Loading...</div>;
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={onFetchPredictions}
-          disabled={loading}
-          className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2 disabled:bg-gray-400"
-        >
-          {loading ? (
-            <>
-              <RefreshCw size={20} className="animate-spin" />
-              Loading...
-            </>
-          ) : (
-            <>
-              <Plus size={20} />
-              Generate Predictions
-            </>
-          )}
-        </button>
+    <div>
+      <h2 className="text-xl">Make a prediction</h2>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 my-4">
+        <input value={home} onChange={e=>setHome(e.target.value)} placeholder="Home team" className="p-2 border rounded"/>
+        <input value={away} onChange={e=>setAway(e.target.value)} placeholder="Away team" className="p-2 border rounded"/>
+        <input value={phg} onChange={e=>setPhg(Number(e.target.value))} type="number" step="0.1" className="p-2 border rounded" />
+        <input value={pag} onChange={e=>setPag(Number(e.target.value))} type="number" step="0.1" className="p-2 border rounded"/>
       </div>
+      <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded">Save prediction</button>
 
-      {predictions.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-          <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            No Predictions Yet
-          </h3>
-          <p className="text-gray-600">
-            Click "Generate Predictions" to analyze upcoming matches
-          </p>
-        </div>
-      ) : (
-        predictions.map((pred) => (
-          <PredictionCard
-            key={pred.id}
-            prediction={pred}
-            onRecordResult={(goals) =>
-              onRecordResult(String(pred.id), goals)
-            }
-          />
-        ))
-      )}
+      <div className="mt-6">
+        {predictions.map(p => <PredictionCard key={p.id} {...p} />)}
+      </div>
     </div>
   );
 }
