@@ -159,13 +159,18 @@ export default function Predictions() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Match Predictions
-        </h1>
-        <p className="text-muted-foreground">
-          AI-powered soccer goal predictions for upcoming matches
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-primary/10 rounded-lg">
+          <TrendingUp className="h-8 w-8 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-1">
+            Match Predictions
+          </h1>
+          <p className="text-muted-foreground">
+            AI-powered soccer goal predictions for upcoming matches
+          </p>
+        </div>
       </div>
 
       <Card className="border-primary/20 shadow-md hover:shadow-lg transition-shadow">
@@ -204,9 +209,9 @@ export default function Predictions() {
       </Card>
 
       {error && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-red-700">
+            <div className="flex items-center gap-2 text-destructive">
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">{error}</span>
             </div>
@@ -273,7 +278,7 @@ export default function Predictions() {
                       />
                       <span className="font-medium">{fixture.teams.home.name}</span>
                     </div>
-                    <span className="text-sm font-bold text-gray-500">VS</span>
+                    <span className="text-sm font-bold text-muted-foreground">VS</span>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{fixture.teams.away.name}</span>
                       <img 
@@ -335,8 +340,8 @@ export default function Predictions() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="text-center py-2 px-3 bg-gray-50 rounded-md">
-                      <p className="text-xs text-gray-600 flex items-center justify-center gap-1">
+                    <div className="text-center py-2 px-3 bg-muted rounded-md">
+                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                         <Users className="h-3 w-3" />
                         Login to make predictions
                       </p>
@@ -352,11 +357,11 @@ export default function Predictions() {
       )}
 
       {fixtures.length === 0 && !loading && !error && (
-        <Card className="border-gray-200">
+        <Card className="border-border">
           <CardContent className="pt-6 text-center">
-            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Matches Found</h3>
-            <p className="text-sm text-gray-500">
+            <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No Matches Found</h3>
+            <p className="text-sm text-muted-foreground">
               Select a league and click "Fetch Latest Matches" to see upcoming fixtures.
             </p>
           </CardContent>

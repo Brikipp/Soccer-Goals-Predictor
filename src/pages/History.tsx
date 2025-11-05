@@ -6,13 +6,18 @@ export default function History() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Prediction History
-          </h1>
-          <p className="text-muted-foreground">
-            Review your past predictions and accuracy
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-primary/10 rounded-lg">
+            <HistoryIcon className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-1">
+              Prediction History
+            </h1>
+            <p className="text-muted-foreground">
+              Review your past predictions and accuracy
+            </p>
+          </div>
         </div>
         <Button variant="destructive" size="sm" className="gap-2">
           <Trash2 className="h-4 w-4" />

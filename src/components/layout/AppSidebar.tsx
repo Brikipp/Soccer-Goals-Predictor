@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar.tsx";
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/services/supabaseClient';
 import { Button } from '@/components/ui/button';
 
 const publicNavItems = [
@@ -32,22 +33,36 @@ export function AppSidebar() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
-  };
-  
   const navItems = user ? authenticatedNavItems : publicNavItems;
+
+  const handleLogout = async () => {
+    console.log('Logout button clicked');
+    try {
+      await signOut();
+      console.log('Sign out successful');
+      // Small delay to ensure storage is cleared
+      await new Promise(resolve => setTimeout(resolve, 100));
+      // Force full page reload to auth page
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <Sidebar 
       collapsible="icon" 
-      className="border-r border-gray-200 bg-white"
+      className="border-r border-border bg-white dark:bg-gray-950"
     >
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-800 font-semibold">
-            {open && "⚽ Menu"}
+          <SidebarGroupLabel className="text-gray-900 dark:text-gray-100 font-bold text-base px-4 py-3">
+            {open && (
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⚽</span>
+                <span>Navigation</span>
+              </div>
+            )}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -57,10 +72,10 @@ export function AppSidebar() {
                     <NavLink
                       to={item.route}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 transition-all rounded-md ${
+                        `flex items-center gap-3 transition-all rounded-md px-3 py-2 ${
                           isActive
-                            ? "bg-green-600 text-white font-medium shadow-md"
-                            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                            ? "bg-primary text-white font-medium shadow-md"
+                            : "text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
                         }`
                       }
                     >
@@ -74,15 +89,13 @@ export function AppSidebar() {
               {/* Logout button for authenticated users */}
               {user && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton tooltip="Logout">
-                    <Button
-                      onClick={handleLogout}
-                      variant="ghost"
-                      className="w-full justify-start text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all"
-                    >
-                      <LogOut className="h-5 w-5 shrink-0" />
-                      <span className="font-medium">Logout</span>
-                    </Button>
+                  <SidebarMenuButton 
+                    tooltip="Logout" 
+                    onClick={handleLogout}
+                    className="w-full text-left text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800 px-3 py-2"
+                  >
+                    <LogOut className="h-5 w-5 shrink-0" />
+                    <span className="font-medium">Logout</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}

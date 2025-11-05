@@ -54,13 +54,18 @@ export default function Profile() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          User Profile
-        </h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and password
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-primary/10 rounded-lg">
+          <User className="h-8 w-8 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-1">
+            User Profile
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your account settings and password
+          </p>
+        </div>
       </div>
 
       {/* User Info Card */}
@@ -76,27 +81,27 @@ export default function Profile() {
         </CardHeader>
         <CardContent className="pt-6 space-y-4">
           <div className="grid gap-4">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-md">
-              <Mail className="h-5 w-5 text-gray-600" />
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-md">
+              <Mail className="h-5 w-5 text-muted-foreground" />
               <div>
-                <Label className="text-sm font-medium text-gray-700">Email</Label>
-                <p className="text-sm text-gray-900">{user?.email}</p>
+                <Label className="text-sm font-medium text-foreground">Email</Label>
+                <p className="text-sm text-foreground">{user?.email}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-md">
-              <Shield className="h-5 w-5 text-gray-600" />
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-md">
+              <Shield className="h-5 w-5 text-muted-foreground" />
               <div>
-                <Label className="text-sm font-medium text-gray-700">Account Status</Label>
-                <p className="text-sm text-green-600 font-medium">Active</p>
+                <Label className="text-sm font-medium text-foreground">Account Status</Label>
+                <p className="text-sm text-green-600 dark:text-green-500 font-medium">Active</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-md">
-              <User className="h-5 w-5 text-gray-600" />
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-md">
+              <User className="h-5 w-5 text-muted-foreground" />
               <div>
-                <Label className="text-sm font-medium text-gray-700">User ID</Label>
-                <p className="text-sm text-gray-500 font-mono">{user?.id?.slice(0, 8)}...</p>
+                <Label className="text-sm font-medium text-foreground">User ID</Label>
+                <p className="text-sm text-muted-foreground font-mono">{user?.id?.slice(0, 8)}...</p>
               </div>
             </div>
           </div>
@@ -145,8 +150,8 @@ export default function Profile() {
             {message && (
               <div className={`flex items-center gap-2 p-3 rounded-md ${
                 message.type === 'success' 
-                  ? 'bg-green-50 text-green-700' 
-                  : 'bg-red-50 text-red-700'
+                  ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-500' 
+                  : 'bg-destructive/10 text-destructive'
               }`}>
                 {message.type === 'success' ? (
                   <CheckCircle className="h-4 w-4" />

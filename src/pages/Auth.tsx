@@ -43,35 +43,35 @@ export default function Auth() {
   // Show configuration error if environment variables are missing
   if (configError) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
+        <div className="bg-card border border-border rounded-lg shadow-xl p-8 w-full max-w-md">
           <div className="flex items-center justify-center mb-6">
-            <AlertCircle className="text-red-600" size={48} />
+            <AlertCircle className="text-destructive" size={48} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 text-center mb-4">
+          <h1 className="text-2xl font-bold text-foreground text-center mb-4">
             Configuration Error
           </h1>
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded-lg mb-6">
             <p className="text-sm">{configError}</p>
           </div>
           <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-700 mb-2">To fix this issue:</h3>
-              <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-                <li>Create a <code className="bg-gray-200 px-1 rounded">.env</code> file in your project root</li>
+            <div className="bg-muted p-4 rounded-lg">
+              <h3 className="font-semibold text-foreground mb-2">To fix this issue:</h3>
+              <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Create a <code className="bg-muted-foreground/20 px-1 rounded">.env</code> file in your project root</li>
                 <li>Add your Supabase credentials:</li>
               </ol>
-              <pre className="bg-gray-800 text-green-400 p-3 rounded mt-2 text-xs overflow-x-auto">
+              <pre className="bg-secondary text-secondary-foreground p-3 rounded mt-2 text-xs overflow-x-auto">
 {`VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
               </pre>
-              <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside mt-2">
+              <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside mt-2">
                 <li>Restart the development server</li>
               </ol>
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
+              className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2"
             >
               <RefreshCw size={16} />
               Reload Page
@@ -85,8 +85,8 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
   // Show loading spinner while checking auth
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }

@@ -65,7 +65,6 @@ export function useAuth(): UseAuthResult {
         .upsert({
           id: authUser.id,
           email: authUser.email!,
-          username: authUser.email!.split('@')[0],
         }, {
           onConflict: 'id',
           ignoreDuplicates: true,
@@ -136,12 +135,25 @@ export function useAuth(): UseAuthResult {
    * Sign out current user
    */
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+    console.log('signOut function called');
+    
+    // Clear user state immediately
+    setUser(null);
+    
+    // Manually clear Supabase session from localStorage
+    console.log('Clearing localStorage');
+    const storageKey = `sb-${import.meta.env.VITE_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`;
+    localStorage.removeItem(storageKey);
+    
+    // Clear all supabase-related items just to be safe
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('sb-') && key.includes('auth')) {
+        console.log('Removing key:', key);
+        localStorage.removeItem(key);
+      }
+    });
+    
+    console.log('Local session cleared');
   };
 
   return {
