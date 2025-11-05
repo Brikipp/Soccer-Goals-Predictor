@@ -54,8 +54,8 @@ export function AppSidebar() {
     >
       <SidebarContent>
         <SidebarGroup>
-          {/* Improved header with better visibility */}
-          <SidebarGroupLabel className="text-gray-900 dark:text-gray-50 font-bold text-base px-4 py-3">
+          {/* Header */}
+          <SidebarGroupLabel className="text-gray-900 dark:text-gray-100 font-bold text-base px-4 py-3">
             {open ? (
               <div className="flex items-center gap-2">
                 <span className="text-xl">⚽</span>
@@ -68,45 +68,49 @@ export function AppSidebar() {
           
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Main navigation items with improved contrast */}
+              {/* Main navigation items */}
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
+                  <SidebarMenuButton 
+                    asChild 
+                    tooltip={item.title}
+                  >
                     <NavLink
                       to={item.route}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 transition-all rounded-md px-3 py-2 ${
+                        `flex items-center gap-3 transition-colors rounded-md px-3 py-2.5 ${
                           isActive
-                            ? "bg-primary text-primary-foreground font-medium shadow-md"
-                            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-50"
+                            ? "bg-primary text-black dark:text-white font-semibold shadow-sm"
+                            : "text-gray-900 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                         }`
                       }
                     >
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      <span className="font-medium">{item.title}</span>
+                      {({ isActive }) => (
+                        <>
+                          <item.icon className={`h-5 w-5 shrink-0 ${isActive ? '' : 'text-gray-700 dark:text-gray-400'}`} />
+                          <span className={`font-medium ${isActive ? '' : 'text-gray-900 dark:text-gray-300'}`}>{item.title}</span>
+                        </>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
               
-              {/* Separator for better visual organization */}
-              {(user || !user) && (
-                <div className="px-2 py-2">
-                  <Separator className="bg-gray-200 dark:bg-gray-800" />
-                </div>
-              )}
+              {/* Separator */}
+              <div className="px-2 py-2">
+                <Separator className="bg-gray-300 dark:bg-gray-700" />
+              </div>
               
-              {/* Login button for non-authenticated users with distinct styling */}
+              {/* Login button */}
               {!user && (
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     asChild 
                     tooltip="Login"
-                    className="bg-primary/10 hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
                   >
                     <NavLink
                       to="/auth"
-                      className="flex items-center gap-3 transition-all rounded-md px-3 py-2 text-primary dark:text-primary-foreground font-medium"
+                      className="flex items-center gap-3 transition-colors rounded-md px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary dark:bg-primary/20 dark:hover:bg-primary/30 dark:text-primary font-semibold"
                     >
                       <LogIn className="h-5 w-5 shrink-0" />
                       <span>Login</span>
@@ -115,13 +119,13 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               )}
               
-              {/* Logout button with improved visibility and feedback */}
+              {/* Logout button */}
               {user && (
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     tooltip="Logout" 
                     onClick={handleLogout}
-                    className="w-full text-left text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/50 dark:hover:text-red-300 px-3 py-2 transition-all font-medium"
+                    className="flex items-center gap-3 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/50 dark:hover:text-red-300 px-3 py-2.5 transition-colors font-semibold cursor-pointer"
                   >
                     <LogOut className="h-5 w-5 shrink-0" />
                     <span>Logout</span>
